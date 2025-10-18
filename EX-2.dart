@@ -40,12 +40,12 @@ class BankAccount {
 
 class Bank {
     // TODO
-    final String name;
+  final String name;
   // Using a private Map to store accounts for the key that is the unique accountId.
   final Map<int, BankAccount> _accounts = {};
 
   Bank({required this.name}); // Constructor to set the bank name
-  
+
   //create Account
   BankAccount createAccount(int accountID, String accountOwner) {
     // Ensure that the account ID is unique.
