@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "id": "question1",
+      "title": "Capital of France?",
+      "choices": [
+        "Paris",
+        "London",
+        "Rome"
+      ],
+      "goodChoice": "Paris",
+      "points": 10
+    },
+    {
+      "id": "question2",
+      "title": "2 + 2 = ?",
+      "choices": [
+        "2",
+        "4",
+        "5"
+      ],
+      "goodChoice": "4",
+      "points": 50
+    }
+  ],
+  "players": [
+    {
+      "id": "17612369421193171792",
+      "name": "EyEy",
+      "score": 50,
+      "point": 50
+    }
+  ]
+}
