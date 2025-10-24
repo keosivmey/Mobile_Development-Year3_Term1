@@ -4,10 +4,10 @@ import 'package:my_first_project/domain/quiz.dart';
 main() {
   // Create 2 questions and the quiz
   Question q1 =
-      Question(title: "2+2", choices: ["1", "2", "4"], goodChoice: "4", point: 10);
+      Question(title: "2+2", choices: ["1", "2", "4"], goodChoice: "4", points: 10);
 
   Question q2 =
-      Question(title: "2+3", choices: ["1", "2", "5"], goodChoice: "5", point: 50);
+      Question(title: "2+3", choices: ["1", "2", "5"], goodChoice: "5", points: 50);
 
   Quiz quiz = Quiz(questions: [q1, q2]);
 
@@ -60,7 +60,7 @@ main() {
       Answer(questionId: q2.id, answerChoice: "5")
     ];
     p1.score = quiz.getScoreInPercentage(p1Answers);
-    p1.point = quiz.getPoint(p1Answers);
+    p1.points = quiz.getPoint(p1Answers);
 
     // Player 2 answers
     List<Answer> p2Answers = [
@@ -68,13 +68,13 @@ main() {
       Answer(questionId: q2.id, answerChoice: "5")
     ];
     p2.score = quiz.getScoreInPercentage(p2Answers);
-    p2.point = quiz.getPoint(p2Answers);
+    p2.points = quiz.getPoint(p2Answers);
 
     // Check players scores
     expect(p1.score, equals(100));
-    expect(p1.point, equals(60));
+    expect(p1.points, equals(60));
 
     expect(p2.score, equals(50));
-    expect(p2.point, equals(50));
+    expect(p2.points, equals(50));
   });
 }

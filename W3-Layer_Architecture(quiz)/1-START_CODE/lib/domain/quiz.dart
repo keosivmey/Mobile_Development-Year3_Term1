@@ -1,57 +1,63 @@
 import 'package:uuid/uuid.dart';
 
-// Create UUID instance
+// UUID generator
 var uuid = Uuid();
 
+// Represent a single question in the quiz
 class Question {
   final String id;
   final String title;
   final List<String> choices;
-  final String goodChoice;
-  final int point;
+  final String goodChoice; 
+  final int points;
 
   Question({
     String? id,
     required this.title,
     required this.choices,
     required this.goodChoice,
-    int point = 1,
-  })  : this.point = point,
-        this.id = id ?? uuid.v4();  // Use UUID v4
+    this.points = 1,
+  }) : id = id ?? uuid.v4();
 
+  // Check if the answer is correct
+  bool isCorrect(String selectedAnswer) {
+    return selectedAnswer == goodChoice;
+  }
+
+  //Create Question from JSON
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
       id: json['id'],
       title: json['title'],
       choices: List<String>.from(json['choices']),
       goodChoice: json['goodChoice'],
-      point: json['points'] ?? 1,
+      points: json['points'] ?? 1,
     );
   }
 
+  //Convert Question to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
       'choices': choices,
       'goodChoice': goodChoice,
-      'points': point,
+      'points': points,
     };
   }
-
-  bool isCorrect(String answer) => answer == goodChoice;
 }
 
+// a player's answer
 class Answer {
   final String id;
   final String questionId;
-  final String answerChoice;
+  final String answerChoice; 
 
   Answer({
     String? id,
     required this.questionId,
     required this.answerChoice,
-  }) : id = id ?? uuid.v4();  // Use UUID v4
+  }) : id = id ?? uuid.v4();
 
   factory Answer.fromJson(Map<String, dynamic> json) {
     return Answer(
@@ -70,24 +76,17 @@ class Answer {
   }
 }
 
+//Represents a quiz player
 class Player {
   final String id;
   final String name;
-  int score = 0;
-  int point = 0;
+  int score = 0; // % score
+  int points = 0; // total points
 
   Player({
     String? id,
     required this.name,
-  }) : id = id ?? uuid.v4();  // Use UUID v4
-
-  void updateScore(int score) {
-    this.score += score;
-  }
-
-  void updatePoint(int points) {
-    this.point += points;
-  }
+  }) : id = id ?? uuid.v4();
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
@@ -95,7 +94,7 @@ class Player {
       name: json['name'],
     )
       ..score = json['score'] ?? 0
-      ..point = json['point'] ?? 0;
+      ..points = json['points'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -103,71 +102,98 @@ class Player {
       'id': id,
       'name': name,
       'score': score,
-      'point': point,
+      'points': points,
     };
   }
 }
 
+/// The Quiz class holds questions, players, and answers
 class Quiz {
   final String id;
   List<Question> questions;
   List<Answer> answers = [];
   List<Player> players = [];
 
-  Quiz({
-    String? id,
-    required this.questions,
-  }) : id = id ?? uuid.v4();  // Use UUID v4
+  Quiz({String? id, required this.questions}) : id = id ?? uuid.v4();
 
-  // GETTERS TO RETRIEVE OBJECTS BY ID
+  // Get Question by ID
   Question getQuestionById(String questionId) {
     return questions.firstWhere(
       (q) => q.id == questionId,
-      orElse: () => throw Exception('Question not found: $questionId')
+      orElse: () => throw Exception('Question not found: $questionId'),
     );
   }
 
-  Answer getAnswerById(String answerId) {
-    return answers.firstWhere(
-      (a) => a.id == answerId,
-      orElse: () => throw Exception('Answer not found: $answerId')
-    );
-  }
-
+  // Get Player by ID
   Player getPlayerById(String playerId) {
     return players.firstWhere(
       (p) => p.id == playerId,
-      orElse: () => throw Exception('Player not found: $playerId')
+      orElse: () => throw Exception('Player not found: $playerId'),
     );
   }
 
-  void addAnswer(Answer answer) {
-    this.answers.add(answer);
-  }
-
+  //Add a player to the quiz
   void addPlayer(Player player) {
-    this.players.add(player);
+    // If player exists, overwrite
+    var existing = players.indexWhere((p) => p.name == player.name);
+    if (existing >= 0) {
+      players[existing] = player;
+    } else {
+      players.add(player);
+    }
   }
 
+  //Add answer to the quiz
+  void addAnswer(Answer answer) {
+    answers.add(answer);
+  }
+
+  // Calculate score in percentage based on answers
   int getScoreInPercentage(List<Answer> answers) {
-    int totalSScore = 0;
-    for (Answer answer in answers) {
-      Question question = getQuestionById(answer.questionId);
+    int correct = 0;
+    for (var answer in answers) {
+      var question = getQuestionById(answer.questionId);
       if (question.isCorrect(answer.answerChoice)) {
-        totalSScore++;
+        correct++;
       }
     }
-    return ((totalSScore / questions.length) * 100).toInt();
+    return ((correct / questions.length) * 100).toInt();
   }
 
+  //Calculate total points 
   int getPoint(List<Answer> answers) {
-    int totalPoint = 0;
-    for (Answer answer in answers) {
-      Question question = getQuestionById(answer.questionId);
+    int total = 0;
+    for (var answer in answers) {
+      var question = getQuestionById(answer.questionId);
       if (question.isCorrect(answer.answerChoice)) {
-        totalPoint += question.point;
+        total += question.points;
       }
     }
-    return totalPoint;
+    return total;
+  }
+
+  //Create Quiz from json
+  factory Quiz.fromJson(Map<String, dynamic> json) {
+    var questionsJson = json['questions'] as List;
+    var questions = questionsJson.map((q) => Question.fromJson(q)).toList();
+
+    var quiz = Quiz(questions: questions);
+
+    // Load players if present
+    if (json['players'] != null) {
+      var playersJson = json['players'] as List;
+      quiz.players = playersJson.map((p) => Player.fromJson(p)).toList();
+    }
+
+    return quiz;
+  }
+
+  //Convert Quiz to json
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'questions': questions.map((q) => q.toJson()).toList(),
+      'players': players.map((p) => p.toJson()).toList(),
+    };
   }
 }

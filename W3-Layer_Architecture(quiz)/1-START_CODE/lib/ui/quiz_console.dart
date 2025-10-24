@@ -2,70 +2,65 @@ import 'dart:io';
 import '../domain/quiz.dart';
 
 class QuizConsole {
-  Quiz quiz;
+  final Quiz quiz;
 
   QuizConsole({required this.quiz});
 
+  // Start the quiz for multiple players
   void startQuiz() {
     print('--- Welcome to the Quiz ---\n');
 
-    // Loop to allow multiple players
     while (true) {
-      stdout.write("Your name: ");
+      stdout.write("Enter your name (empty to quit): ");
       String? playerName = stdin.readLineSync();
 
-      // Exit if no name is provided
-      if (playerName == null || playerName.trim().isEmpty) {
-        break;
-      }
+      if (playerName == null || playerName.trim().isEmpty) break;
 
-      // Add players to the quiz
-      quiz.addPlayer(Player(name: playerName));
+      // Create or overwrite player
+      var player = Player(name: playerName);
+      quiz.addPlayer(player);
 
-      // Player takes quiz
       List<Answer> playerAnswers = [];
 
+      // Ask each question
       for (var question in quiz.questions) {
-        print('Question: ${question.title} - (${question.point} points)');
-        
-        // Display choices with numbers for better UX
+        print('\nQuestion: ${question.title} (${question.points} pts)');
+
         for (int i = 0; i < question.choices.length; i++) {
           print('${i + 1}. ${question.choices[i]}');
         }
-        
-        stdout.write('Your answer (1-${question.choices.length}): ');
-        String? userInput = stdin.readLineSync();
-        int? choiceIndex = int.tryParse(userInput ?? '');
 
-        // Check for valid input
-        if (choiceIndex != null && choiceIndex >= 1 && choiceIndex <= question.choices.length) {
+        stdout.write('Your answer (1-${question.choices.length}): ');
+        int? choiceIndex = int.tryParse(stdin.readLineSync() ?? '');
+
+        if (choiceIndex != null &&
+            choiceIndex >= 1 &&
+            choiceIndex <= question.choices.length) {
           String selectedAnswer = question.choices[choiceIndex - 1];
-          
-          // Create answer with question ID reference
-          Answer answer = Answer(
-            questionId: question.id, // Use question ID instead of object
-            answerChoice: selectedAnswer
+
+          var answer = Answer(
+            questionId: question.id,
+            answerChoice: selectedAnswer,
           );
+
           playerAnswers.add(answer);
           quiz.addAnswer(answer);
         } else {
           print('Invalid choice. Skipping question.');
         }
-
-        print('');
       }
 
-      // Calculate score and points for players
-      quiz.players.last.score = quiz.getScoreInPercentage(playerAnswers);
-      quiz.players.last.point = quiz.getPoint(playerAnswers);
+      // Calculate score
+      player.score = quiz.getScoreInPercentage(playerAnswers);
+      player.points = quiz.getPoint(playerAnswers);
 
-      print("${quiz.players.last.name}, your score in percentage: ${quiz.players.last.score} %");
-      print("${quiz.players.last.name}, your score in points: ${quiz.players.last.point}");
+      print(
+          '\n${player.name}, your score: ${player.score}% | Points: ${player.points}');
 
-      // Display all players scores
-      print("\nAll players scores:");
-      for (var player in quiz.players) {
-        print("Player: ${player.name}\t\tScore: ${player.score}% \tPoints: ${player.point}");
+      // Show all players
+      print('\n--- All players scores ---');
+      for (var p in quiz.players) {
+        print('Player: ${p.name} | Score: ${p.score}% | Points: ${p.points}');
       }
       print('');
     }
