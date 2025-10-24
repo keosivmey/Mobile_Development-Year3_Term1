@@ -1,10 +1,7 @@
-import 'dart:math';
+import 'package:uuid/uuid.dart';
 
-// Simple ID generator without UUID package
-String generateId() {
-  final random = Random();
-  return '${DateTime.now().microsecondsSinceEpoch}${random.nextInt(10000)}';
-}
+// Create UUID instance
+var uuid = Uuid();
 
 class Question {
   final String id;
@@ -20,7 +17,7 @@ class Question {
     required this.goodChoice,
     int point = 1,
   })  : this.point = point,
-        this.id = id ?? generateId();
+        this.id = id ?? uuid.v4();  // Use UUID v4
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
@@ -47,20 +44,19 @@ class Question {
 
 class Answer {
   final String id;
-  final String questionId; // Changed from Question to questionId
+  final String questionId;
   final String answerChoice;
 
   Answer({
     String? id,
-    required this.questionId, // Now takes questionId instead of Question
+    required this.questionId,
     required this.answerChoice,
-  }) : id = id ?? generateId();
-
+  }) : id = id ?? uuid.v4();  // Use UUID v4
 
   factory Answer.fromJson(Map<String, dynamic> json) {
     return Answer(
       id: json['id'],
-      questionId: json['questionId'], // Changed from question to questionId
+      questionId: json['questionId'],
       answerChoice: json['answerChoice'],
     );
   }
@@ -83,7 +79,7 @@ class Player {
   Player({
     String? id,
     required this.name,
-  }) : id = id ?? generateId();
+  }) : id = id ?? uuid.v4();  // Use UUID v4
 
   void updateScore(int score) {
     this.score += score;
@@ -121,9 +117,9 @@ class Quiz {
   Quiz({
     String? id,
     required this.questions,
-  }) : id = id ?? generateId();
+  }) : id = id ?? uuid.v4();  // Use UUID v4
 
-  // getter to retrieve question by ID
+  // GETTERS TO RETRIEVE OBJECTS BY ID
   Question getQuestionById(String questionId) {
     return questions.firstWhere(
       (q) => q.id == questionId,
@@ -138,6 +134,13 @@ class Quiz {
     );
   }
 
+  Player getPlayerById(String playerId) {
+    return players.firstWhere(
+      (p) => p.id == playerId,
+      orElse: () => throw Exception('Player not found: $playerId')
+    );
+  }
+
   void addAnswer(Answer answer) {
     this.answers.add(answer);
   }
@@ -149,7 +152,6 @@ class Quiz {
   int getScoreInPercentage(List<Answer> answers) {
     int totalSScore = 0;
     for (Answer answer in answers) {
-      // Get the question to check if answer is correct
       Question question = getQuestionById(answer.questionId);
       if (question.isCorrect(answer.answerChoice)) {
         totalSScore++;
@@ -161,7 +163,6 @@ class Quiz {
   int getPoint(List<Answer> answers) {
     int totalPoint = 0;
     for (Answer answer in answers) {
-      // Get the question to check if answer is correct and get points
       Question question = getQuestionById(answer.questionId);
       if (question.isCorrect(answer.answerChoice)) {
         totalPoint += question.point;
