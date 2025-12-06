@@ -1,1 +1,31 @@
-
+{
+  "id": "quiz_001",
+  "questions": [
+    {
+      "id": "q1",
+      "title": "Where is CADT?",
+      "choices": ["Toul Tompoung", "Prek Leap", "Doun Penh", "Toul Kouk"],
+      "correctChoice": 1,
+      "point": 1
+    },
+    {
+      "id": "q2",
+      "title": "How major department of CADT?",
+      "choices": ["1", "3", "5", "7"],
+      "correctChoice": 1,
+      "point": 1
+    },
+    {
+        "id": "q3",
+        "title": "What is CADT full Name?",
+        "choices": [
+            "Cambodia Academic of Digital and Technology",
+            "Cambodia Academic Development of Technology",
+            "Cambodia Academy of Development and Technology",
+            "Cambodia Academy of Digital Technology"
+        ],
+        "correctChoice": 3,
+        "point": 1
+    }
+]
+}
